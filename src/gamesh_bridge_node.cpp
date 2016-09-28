@@ -52,12 +52,12 @@ void pointcloud2Callback(const sensor_msgs::PointCloud2::ConstPtr& msg) {
 	tf::Quaternion tfOrientation;
 	geometry_msgs::PoseStamped p = globalLastPose;
 //	Eigen::Vector3f origin;
-//	Eigen::Quaternionf orientation;
+//	Eigen::Quaternionf poseOrientation;
 	
 	pcl::fromROSMsg(*msg, c);
 
 	try {
-		tfListener->waitForTransform(TF_FIXED_FRAME, TF_MARKERSET_FRAME, ros::Time(msg->header.stamp), ros::Duration(5.0) );
+		tfListener->waitForTransform(TF_FIXED_FRAME, TF_MARKERSET_FRAME, ros::Time(msg->header.stamp), ros::Duration(1.0) );
 		tfListener->lookupTransform(TF_FIXED_FRAME, TF_MARKERSET_FRAME, ros::Time(msg->header.stamp), tfTransform);
 	} catch (tf::TransformException ex) {
 		ROS_ERROR("%s",ex.what());
@@ -68,7 +68,7 @@ void pointcloud2Callback(const sensor_msgs::PointCloud2::ConstPtr& msg) {
 	
 	
 //	origin = Eigen::Vector4f(p.pose.position.x, p.pose.position.y, p.pose.position.z, 0.0);
-//	orientation = Eigen::Quaternionf(p.pose.orientation.w, p.pose.orientation.x, p.pose.orientation.y, p.pose.orientation.z); // := (w, x, y, z)
+//	poseOrientation = Eigen::Quaternionf(p.pose.orientation.w, p.pose.orientation.x, p.pose.orientation.y, p.pose.orientation.z); // := (w, x, y, z)
 	
 //	origin = Eigen::Vector4f(tfTransform.getOrigin().x(), tfTransform.getOrigin().y(), tfTransform.getOrigin().z(), 0.0);
 
@@ -86,17 +86,37 @@ void pointcloud2Callback(const sensor_msgs::PointCloud2::ConstPtr& msg) {
 //	ROS_INFO("orientation:\t %f \t %f \t %f \t %f", orientation.x(), orientation.y(), orientation.z(), orientation.w());
 	
 	
-	transform.rotate(Eigen::Quaternionf(tfOrientation.getW(), tfOrientation.getAxis().x(), tfOrientation.getAxis().y(), tfOrientation.getAxis().z()));
+	tf::Matrix3x3 tf_rotation_matrix(tfOrientation);
+	double roll, pitch, yaw;
+	tf_rotation_matrix.getRPY(roll, pitch, yaw);
+	
+	std::cout << "tf   transform o   :\t" << "\tr: " << roll << ",   \tp: " << pitch << ",   \ty: " << yaw << std::endl;
+	
+	
+//	tf::Matrix3x3 pose_rotation_matrix(poseOrientation);
+//	double p_roll, p_pitch, p_yaw;
+//	tf_rotation_matrix.getRPY(p_roll, p_pitch, p_yaw);
+	
+//	std::cout << "pose transform o   :\t" << "\tr: " << p_roll << ",   \tp: " << p_pitch << ",   \ty: " << p_yaw << std::endl << std::endl;
+	
+	
+	
+	
+//	transform.rotate(Eigen::Quaternionf(tfOrientation.getW(), tfOrientation.getAxis().x(), tfOrientation.getAxis().y(), tfOrientation.getAxis().z()));
 	transform.translate(Eigen::Vector3f(tfOrigin.x(), tfOrigin.y(), tfOrigin.z()));
 //	transform.translation() << c.sensor_origin_[0], c.sensor_origin_[1], c.sensor_origin_[2];
+	
+	transform.rotate(Eigen::AngleAxis<float>(yaw, Eigen::Vector3f(0,0,1)));
+	transform.rotate(Eigen::AngleAxis<float>(roll, Eigen::Vector3f(1,0,0)));
+	transform.rotate(Eigen::AngleAxis<float>(pitch, Eigen::Vector3f(0,1,0)));
 	
 //	std::cout << "transform matrix:" << std::endl << transform.matrix() << std::endl << std::endl;
 	
 //	std::cout << "tf transform pose:\tp.x: " << tfOrigin.x() << ",\tp.y:    " << tfOrigin.y() << ",\tp.z: " << tfOrigin.z() << std::endl << ",\to.x: " << tfOrientation.getAxis().x() << ",\to.y: " << tfOrientation.getAxis().y() << ",\to.z: " << tfOrientation.getAxis().z() << ",\to.w: " << tfOrientation.getW() << std::endl;
 //	std::cout << "cb transform pose:\tp.x: " << p.pose.position.x << ",\tp.y:    " << p.pose.position.y << ",\tp.z: " << p.pose.position.z << std::endl << ",\to.x: " << p.pose.orientation.x << ",\to.y: " << p.pose.orientation.y << ",\to.z: " << p.pose.orientation.z << ",\to.w: " << p.pose.orientation.w << std::endl;
-	std::cout << "tf transform o diff:\t" << "\to.x: " << tfOrientation.getAxis().x()-p.pose.orientation.x << ",   \to.y: " << tfOrientation.getAxis().y()-p.pose.orientation.y << ",   \to.z: " << tfOrientation.getAxis().z()-p.pose.orientation.z << ",   \to.w: " << tfOrientation.getW()-p.pose.orientation.w << std::endl;
-	std::cout << "tf transform o tf  :\t" << "\to.x: " << tfOrientation.getAxis().x() << ",   \to.y: " << tfOrientation.getAxis().y() << ",   \to.z: " << tfOrientation.getAxis().z() << ",   \to.w: " << tfOrientation.getW() << std::endl;
-	std::cout << "cb transform o cb  :\t" << "\to.x: " << p.pose.orientation.x << ",   \to.y: " << p.pose.orientation.y << ",   \to.z: " << p.pose.orientation.z << ",   \to.w: " << p.pose.orientation.w << std::endl << std::endl ;
+//	std::cout << "tf transform o diff:\t" << "\to.x: " << tfOrientation.getAxis().x()-p.pose.orientation.x << ",   \to.y: " << tfOrientation.getAxis().y()-p.pose.orientation.y << ",   \to.z: " << tfOrientation.getAxis().z()-p.pose.orientation.z << ",   \to.w: " << tfOrientation.getW()-p.pose.orientation.w << std::endl;
+//	std::cout << "tf transform o tf  :\t" << "\to.x: " << tfOrientation.getAxis().x() << ",   \to.y: " << tfOrientation.getAxis().y() << ",   \to.z: " << tfOrientation.getAxis().z() << ",   \to.w: " << tfOrientation.getW() << std::endl;
+//	std::cout << "cb transform o cb  :\t" << "\to.x: " << p.pose.orientation.x << ",   \to.y: " << p.pose.orientation.y << ",   \to.z: " << p.pose.orientation.z << ",   \to.w: " << p.pose.orientation.w << std::endl << std::endl ;
 	
 //	std::cout << "time diffs:\t" << p.header.stamp << "\t,\t" << c.header.stamp << std::endl;
 	
