@@ -1,0 +1,25 @@
+<launch>
+	<node name="gamesh_bridge_node"
+		pkg="gamesh_bridge"
+		type="gamesh_bridge_node"
+		output="screen"
+		required="true"
+	/>
+	
+	<node name="mocap_node"
+		type="mocap_node"
+		pkg="mocap_optitrack" 
+		respawn="false"
+		launch-prefix=""
+		required="true">
+		<rosparam file="$(find gamesh_bridge)/config/mocap.yaml" command="load" />
+	</node>
+	
+	<node name="kinect2_rgb_transform"
+		pkg="tf"
+		type="static_transform_publisher"
+		args="0 0 0 0 0 0 world kinect2_link 100"
+		required="true"
+	/>
+	
+</launch>
