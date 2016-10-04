@@ -1,5 +1,5 @@
 rigid_bodies:
-    '2':
+    '1':
         pose: tracked_kinect/pose
         child_frame_id: tracked_kinect
         parent_frame_id: world
