@@ -4,10 +4,18 @@ project(gamesh_bridge)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS
-	roscpp std_msgs geometry_msgs sensor_msgs nav_msgs tf
-	pcl_conversions pcl_msgs
-	message_generation
+find_package(
+	catkin REQUIRED COMPONENTS
+		roscpp
+		message_generation
+		std_msgs
+		geometry_msgs
+		sensor_msgs
+		nav_msgs
+		shape_msgs
+		pcl_msgs
+		pcl_conversions
+		tf
 )
 
 ## System dependencies are found with CMake's conventions
@@ -48,6 +56,8 @@ find_package(PCL REQUIRED)
 add_message_files(
 	FILES
 		GameshRays.msg
+		GameshRays.msg
+		GameshIdentifiedRays.msg
 )
 
 ## Generate services in the 'srv' folder
@@ -70,6 +80,7 @@ generate_messages(
 		std_msgs
 		geometry_msgs
 		sensor_msgs
+		shape_msgs
 )
 
 
@@ -156,6 +167,7 @@ target_link_libraries(gamesh_bridge_node
 	${catkin_LIBRARIES} ${PCL_LIBRARIES}
 )
 
+add_dependencies(gamesh_bridge_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 #############
 ## Install ##
 #############
